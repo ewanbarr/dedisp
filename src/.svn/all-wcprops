@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 26
+/svn/!svn/ver/43/trunk/src
+END
+kernels.cuh
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/43/trunk/src/kernels.cuh
+END
+transpose.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/13/trunk/src/transpose.hpp
+END
+DedispPlan.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/13/trunk/src/DedispPlan.hpp
+END
+gpu_memory.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/42/trunk/src/gpu_memory.hpp
+END
+dedisp.h
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/40/trunk/src/dedisp.h
+END
+dedisp.cu
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/42/trunk/src/dedisp.cu
+END
