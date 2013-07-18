@@ -1,4 +1,3 @@
-
 include Makefile.inc
 
 # Output directories
@@ -33,7 +32,12 @@ A_NAME    := $(LIB_DIR)/$(LIB_NAME)$(A_EXT)
 
 PTX_NAME  := ./dedisp_kernels.ptx
 
-all: shared
+all: directories shared
+
+directories:
+	@mkdir -p ${LIB_DIR}
+	@mkdir -p ${OBJ_DIR}
+	@mkdir -p ${BIN_DIR}
 
 #$(ECHO) Building shared library "libdedisp.so.1.0.1"
 shared: $(SO_NAME)
