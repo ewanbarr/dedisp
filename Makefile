@@ -71,3 +71,11 @@ doc: $(SRC_DIR)/dedisp.h Doxyfile
 
 clean:
 	$(RM) -f $(SO_NAME) $(A_NAME) $(OBJ_DIR)/*.o
+	
+
+install: all
+	cp $(INTERFACE) $(INSTALL_DIR)/include/
+	cp $(CPP_INTERFACE) $(INSTALL_DIR)/include/
+	cp $(SO_NAME) $(INSTALL_DIR)/lib/
+	ln -s -f $(SO_FILE) $(INSTALL_DIR)/lib/$(LIB_NAME)$(SO_EXT).$(MAJOR)
+	ln -s -f $(SO_FILE) $(INSTALL_DIR)/lib/$(LIB_NAME)$(SO_EXT)
