@@ -4,6 +4,7 @@ CUDA_PATH ?= /usr/local/cuda
 
 CUDA_DIR   ?= $(CUDA_PATH)
 THRUST_DIR ?= $(CUDA_DIR)/include
+INSTALL_DIR ?= /usr/local
 
 # LIB_ARCH   = lib
 LIB_ARCH   = lib64
