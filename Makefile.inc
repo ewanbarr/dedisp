@@ -13,7 +13,7 @@ GPU_ARCH_FLAG = -arch=sm_61
 GCC        = gcc
 GXX        = g++
 AR         = ar
-NVCC       = $(CUDA_DIR)/bin/nvcc -Xptxas -abi=no
+NVCC       = $(CUDA_DIR)/bin/nvcc 
 DOXYGEN    = doxygen
 RM         = rm
 ECHO       = echo
