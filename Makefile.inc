@@ -12,7 +12,7 @@ LIB_ARCH   = lib64
 GCC        = gcc
 GXX        = g++
 AR         = ar
-NVCC       = $(CUDA_DIR)/bin/nvcc -Xptxas -abi=no
+NVCC       = $(CUDA_DIR)/bin/nvcc 
 DOXYGEN    = doxygen
 RM         = rm
 ECHO       = echo
