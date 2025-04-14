@@ -25,6 +25,9 @@
 
 #include <thrust/transform.h> // For scrunch_x2
 #include <thrust/iterator/counting_iterator.h>
+#include <cuda.h>  // For CUDA_VERSION
+
+
 
 // Kernel tuning parameters
 #define DEDISP_BLOCK_SIZE       256
@@ -34,8 +37,15 @@
 __constant__ dedisp_float c_delay_table[DEDISP_MAX_NCHANS];
 __constant__ dedisp_bool  c_killmask[DEDISP_MAX_NCHANS];
 
+
+
+// CUDA 12 no longer supports texture references, so don't use them at all.
+#if CUDA_VERSION < 12000
 // Texture reference for input data
 texture<dedisp_word, 1, cudaReadModeElementType> t_in;
+#endif
+
+
 
 template<int NBITS, typename T=unsigned int>
 struct max_value {
@@ -232,11 +242,11 @@ void dedisperse_kernel(const dedisp_word*  d_in,
 				dedisp_float frac_delay = c_delay_table[chan_idx];
 				// Compute the integer delay
 				dedisp_size delay = __float2uint_rn(dm * frac_delay);
-				
+			        #if CUDA_VERSION < 12000	
 				if( USE_TEXTURE_MEM ) { // Pre-Fermi path
 					// Loop over samples per thread
 					// Note: Unrolled to ensure the sum[] array is stored in regs
-                    #pragma unroll
+                    			#pragma unroll
 					for( dedisp_size s=0; s<SAMPS_PER_THREAD; ++s ) {
 						// Grab the word containing the sample from texture mem
 						dedisp_word sample = tex1Dfetch(t_in, offset+s + delay);
@@ -248,9 +258,9 @@ void dedisperse_kernel(const dedisp_word*  d_in,
 									 extract_subword<IN_NBITS>(sample,chan_sub));
 					}
 				}
-				else { // Fermi path
+				#else
 					// Note: Unrolled to ensure the sum[] array is stored in regs
-                    #pragma unroll
+                    			#pragma unroll
 					for( dedisp_size s=0; s<SAMPS_PER_THREAD; ++s ) {
 						// Grab the word containing the sample from global mem
 						dedisp_word sample = d_in[offset + s + delay];
@@ -260,7 +270,7 @@ void dedisperse_kernel(const dedisp_word*  d_in,
 							c_killmask[chan_idx] *
 							extract_subword<IN_NBITS>(sample, chan_sub);
 					}
-				}
+			  	#endif
 			}
 		}
 		
@@ -305,6 +315,7 @@ void dedisperse_kernel(const dedisp_word*  d_in,
 }
 
 bool check_use_texture_mem() {
+	#if CUDA_VERSION < 12000
 	// Decides based on GPU architecture
 	int device_idx;
 	cudaGetDevice(&device_idx);
@@ -313,6 +324,9 @@ bool check_use_texture_mem() {
 	// Fermi runs worse with texture mem
 	bool use_texture_mem = (device_props.major != 2);
 	return use_texture_mem;
+	#else
+	return false;
+    	#endif
 }
 
 bool dedisperse(const dedisp_word*  d_in,
@@ -345,7 +359,8 @@ bool dedisperse(const dedisp_word*  d_in,
 	// Initialise texture memory if necessary
 	// --------------------------------------
 	// Determine whether we should use texture memory
-	bool use_texture_mem = check_use_texture_mem();
+#if CUDA_VERSION < 12000
+bool use_texture_mem = check_use_texture_mem();
 	if( use_texture_mem ) {
 		dedisp_size chans_per_word = sizeof(dedisp_word)*BITS_PER_BYTE / in_nbits;
 		dedisp_size nchan_words    = nchans / chans_per_word;
@@ -366,6 +381,7 @@ bool dedisperse(const dedisp_word*  d_in,
 		}
 #endif // DEDISP_DEBUG
 	}
+#endif // CUDA_VERSION < 12000
 	// --------------------------------------
 	
 	// Define thread decomposition
@@ -423,6 +439,7 @@ bool dedisperse(const dedisp_word*  d_in,
 									 batch_chan_stride,					\
 									 batch_out_stride)
 	// Note: Here we dispatch dynamically on nbits for supported values
+	#if CUDA_VERSION < 12000
 	if( use_texture_mem ) {
 		switch( in_nbits ) {
 			case 1:  DEDISP_CALL_KERNEL(1,true);  break;
@@ -434,7 +451,9 @@ bool dedisperse(const dedisp_word*  d_in,
 			default: /* should never be reached */ break;
 		}
 	}
-	else {
+	else 
+	#endif
+	     {
 		switch( in_nbits ) {
 			case 1:  DEDISP_CALL_KERNEL(1,false);  break;
 			case 2:  DEDISP_CALL_KERNEL(2,false);  break;
@@ -450,7 +469,7 @@ bool dedisperse(const dedisp_word*  d_in,
 	// Check for kernel errors
 #ifdef DEDISP_DEBUG
 	//cudaStreamSynchronize(stream);
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	cudaError_t cuda_error = cudaGetLastError();
 	if( cuda_error != cudaSuccess ) {
 		return false;

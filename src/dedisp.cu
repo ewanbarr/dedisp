@@ -630,7 +630,7 @@ dedisp_error dedisp_execute_guru(const dedisp_plan  plan,
 	                        thrust::raw_pointer_cast(&plan->d_delay_table[device_idx][0]),
 							plan->nchans * sizeof(dedisp_float),
 							0, cudaMemcpyDeviceToDevice, 0);
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	cudaError_t error = cudaGetLastError();
 	if( error != cudaSuccess ) {
 		throw_error(DEDISP_MEM_COPY_FAILED);
@@ -639,7 +639,7 @@ dedisp_error dedisp_execute_guru(const dedisp_plan  plan,
 	                        thrust::raw_pointer_cast(&plan->d_killmask[device_idx][0]),
 							plan->nchans * sizeof(dedisp_bool),
 							0, cudaMemcpyDeviceToDevice, 0);
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	error = cudaGetLastError();
 	if( error != cudaSuccess ) {
 		throw_error(DEDISP_MEM_COPY_FAILED);
@@ -813,7 +813,7 @@ dedisp_error dedisp_execute_guru(const dedisp_plan  plan,
 			}
 		}
 #ifdef DEDISP_BENCHMARK
-		cudaThreadSynchronize();
+		cudaDeviceSynchronize();
 		copy_to_timer.stop();
 		transpose_timer.start();
 #endif
@@ -824,7 +824,7 @@ dedisp_error dedisp_execute_guru(const dedisp_plan  plan,
 		                    in_buf_stride_words, nsamps_padded_gulp,
 		                    d_transposed);
 #ifdef DEDISP_BENCHMARK
-		cudaThreadSynchronize();
+		cudaDeviceSynchronize();
 		transpose_timer.stop();
 		
 		kernel_timer.start();
@@ -1007,7 +1007,7 @@ dedisp_error dedisp_execute_guru(const dedisp_plan  plan,
 #endif // SB/direct algorithm
 
 #ifdef DEDISP_BENCHMARK
-		cudaThreadSynchronize();
+		cudaDeviceSynchronize();
 		kernel_timer.stop();
 #endif
 		// Copy output back to host memory if necessary
@@ -1051,7 +1051,7 @@ dedisp_error dedisp_execute_guru(const dedisp_plan  plan,
 				                       dm_count);                 // height
 			}
 #ifdef DEDISP_BENCHMARK
-			cudaThreadSynchronize();
+			cudaDeviceSynchronize();
 			copy_from_timer.stop();
 #endif
 		}
@@ -1213,7 +1213,7 @@ dedisp_error dedisp_execute(const dedisp_plan  plan,
 
 dedisp_error dedisp_sync(void)
 {
-	if( cudaThreadSynchronize() != cudaSuccess )
+	if( cudaDeviceSynchronize() != cudaSuccess )
 		throw_error(DEDISP_PRIOR_GPU_ERROR);
 	else
 		return DEDISP_NO_ERROR;

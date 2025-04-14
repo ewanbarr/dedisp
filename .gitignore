@@ -15,3 +15,5 @@ obj/
 *.lai
 *.la
 *.a
+
+**/.bdm.db
