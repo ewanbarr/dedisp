@@ -50,6 +50,12 @@ else
     ifneq ($(shell expr $(CUDA_MAJOR) \>= 12 \& $(CUDA_MINOR) \>= 2), 0)
         GPU_ARCH_FLAG += -gencode arch=compute_90,code=sm_90
     endif
+    ifneq ($(shell expr $(CUDA_MAJOR) \>= 12 \& $(CUDA_MINOR) \>= 6), 0)
+        GPU_ARCH_FLAG += -gencode arch=compute_100,code=sm_100
+    endif
+    ifneq ($(shell expr $(CUDA_MAJOR) \>= 12 \& $(CUDA_MINOR) \>= 8), 0)
+        GPU_ARCH_FLAG += -gencode arch=compute_120,code=sm_120
+    endif
 endif
 
 
